@@ -1,0 +1,12 @@
+{
+  "name": "decemberlabs-test-challenge",
+  "version": "1.0.0",
+  "description": "december labs test challenge",
+  "main": "index.js",
+  "scripts": {},
+  "author": "gequise",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.35.1"
+  }
+}
