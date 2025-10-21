@@ -31,17 +31,16 @@ export default class SlackReporter implements Reporter {
     if (this.webhookUrl) {
       let passedCount = 0;
       let failedCount = 0;
-      let detailsArr: string[] = [];
       for (const r of this.finalResults.values()) {
         if (r.status === "✅ Passed") passedCount++;
         else if (r.status === "❌ Failed") failedCount++;
-        detailsArr.push(`${r.status}: *${r.title}* (${r.location})`);
       }
       const totalCount = passedCount + failedCount;
-      const summary = `*Test Summary*\nTotal: ${totalCount}\n✅ Passed: ${passedCount}\n❌ Failed: ${failedCount}`;
-      const details = detailsArr.join("\n");
+      const now = new Date();
+      const dateStr = now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' });
+      const summary = `*Test Summary*\nDate: ${dateStr}\nTotal: ${totalCount}\n✅ Passed: ${passedCount}\n❌ Failed: ${failedCount}`;
       const message = {
-        text: `${summary}\n\n${details}`,
+        text: summary,
       };
       await this.sendSlackMessage(message);
     }
