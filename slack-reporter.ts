@@ -5,10 +5,7 @@ import fetch from "node-fetch";
 
 export default class SlackReporter implements Reporter {
   private webhookUrl: string;
-  private passedCount: number = 0;
-  private failedCount: number = 0;
-  private totalCount: number = 0;
-  private testResults: { title: string; status: string; location: string }[] = [];
+  private finalResults: Map<string, { title: string; status: string; location: string } > = new Map();
 
   constructor(options: { webhookUrl: string }) {
     this.webhookUrl = options.webhookUrl;
@@ -21,31 +18,28 @@ export default class SlackReporter implements Reporter {
   }
 
   async onTestEnd(test: TestCase, result: TestResult) {
-    this.totalCount++;
+    // Solo guardamos el resultado final por test.id
     const location = `${test.location.file}:${test.location.line}`;
-    if (result.status === "passed") {
-      this.passedCount++;
-      this.testResults.push({ title: test.title, status: "✅ Passed", location });
-      if (this.webhookUrl) {
-        await this.sendSlackMessage({
-          text: `✅ Test passed: *${test.title}*\n📍 Location: ${location}`,
-        });
-      }
-    } else if (result.status === "failed") {
-      this.failedCount++;
-      this.testResults.push({ title: test.title, status: "❌ Failed", location });
-      if (this.webhookUrl) {
-        await this.sendSlackMessage({
-          text: `❌ Test failed: *${test.title}*\n📍 Location: ${location}`,
-        });
-      }
-    }
+    this.finalResults.set(test.id, {
+      title: test.title,
+      status: result.status === "passed" ? "✅ Passed" : "❌ Failed",
+      location,
+    });
   }
 
   async onEnd() {
     if (this.webhookUrl) {
-      const summary = `*Test Summary*\nTotal: ${this.totalCount}\n✅ Passed: ${this.passedCount}\n❌ Failed: ${this.failedCount}`;
-      let details = this.testResults.map(r => `${r.status}: *${r.title}* (${r.location})`).join("\n");
+      let passedCount = 0;
+      let failedCount = 0;
+      let detailsArr: string[] = [];
+      for (const r of this.finalResults.values()) {
+        if (r.status === "✅ Passed") passedCount++;
+        else if (r.status === "❌ Failed") failedCount++;
+        detailsArr.push(`${r.status}: *${r.title}* (${r.location})`);
+      }
+      const totalCount = passedCount + failedCount;
+      const summary = `*Test Summary*\nTotal: ${totalCount}\n✅ Passed: ${passedCount}\n❌ Failed: ${failedCount}`;
+      const details = detailsArr.join("\n");
       const message = {
         text: `${summary}\n\n${details}`,
       };
