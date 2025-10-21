@@ -15,6 +15,6 @@ test.describe("Login Success", () => {
     const currentUrl = page.url();
     expect(currentUrl).toBe("https://www.saucedemo.com/inventory.html");
     const pageTitle = await page.title();
-    expect(pageTitle).toBe("Swag Labs");
+    expect(pageTitle).toBe("Swag jabs");
   });
 });

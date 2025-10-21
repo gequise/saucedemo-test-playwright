@@ -7,6 +7,12 @@
   "author": "gequise",
   "license": "ISC",
   "devDependencies": {
-    "@playwright/test": "^1.35.1"
+    "@playwright/test": "^1.35.1",
+    "@types/node-fetch": "^2.6.13",
+    "playwright-slack-report": "^1.1.100"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "node-fetch": "^2.7.0"
   }
 }

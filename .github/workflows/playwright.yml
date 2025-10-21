@@ -29,7 +29,9 @@ jobs:
       - name: Install Playwright browsers and dependencies
         run: npx playwright install --with-deps
 
-      - name: Run Playwright tests
+      - name: Run Playwright tests with Slack reporting
+        env:
+          SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_UR}}
         run: npx playwright test
 
       - name: Upload Playwright report

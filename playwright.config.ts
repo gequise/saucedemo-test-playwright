@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+require('dotenv').config();
 
 /**
  * Read environment variables from file.
@@ -9,6 +10,9 @@ import { defineConfig, devices } from "@playwright/test";
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
+
+const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+
 export default defineConfig({
   testDir: "./tests",
   /* Run tests in files in parallel */
@@ -20,7 +24,7 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [["html"], ["github"]],
+  reporter: [["html"], ["list"], ["./slack-reporter.ts", { webhookUrl }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
