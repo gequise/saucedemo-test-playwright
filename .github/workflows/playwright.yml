@@ -1,6 +1,7 @@
 name: Playwright Tests
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main, master ]
   pull_request:
@@ -31,7 +32,7 @@ jobs:
 
       - name: Run Playwright tests with Slack reporting
         env:
-          SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_UR}}
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: npx playwright test
 
       - name: Upload Playwright report
