@@ -7,6 +7,11 @@ on:
   pull_request:
     branches: [ main, master ]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   test:
     timeout-minutes: 60
@@ -24,7 +29,7 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
 
-      - name: Update apt package index (to prevent missing package errors)
+      - name: Update apt package index
         run: sudo apt-get update
 
       - name: Install Playwright browsers and dependencies
@@ -32,13 +37,31 @@ jobs:
 
       - name: Run Playwright tests with Slack reporting
         env:
-            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: npx playwright test
 
-      - name: Upload Playwright report
+      - name: Upload Playwright report for Pages
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: playwright-report
+          name: github-pages
           path: playwright-report/
           retention-days: 30
+
+  deploy-report:
+    needs: test
+    if: always()
+    
+    permissions:
+      pages: write
+      id-token: write
+      
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
