@@ -12,7 +12,7 @@ export default class SlackReporter implements Reporter {
     this.gitHubServerUrl = process.env.GITHUB_SERVER_URL;
 
     if (!this.webhookUrl || !/^https?:\/.*/.test(this.webhookUrl)) {
-      console.warn("⚠️ SlackReporter: URL de webhook inválida.");
+      console.warn("⚠️ SlackReporter: Invalid Webhook URL.");
       this.webhookUrl = "";
     }
   }
@@ -39,9 +39,9 @@ export default class SlackReporter implements Reporter {
 
     const totalCount = passedCount + failedCount;
     const now = new Date();
-    const dateStr = now.toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" });
+    const dateStr = now.toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" });
     
-    let reportUrl = "No disponible (Ejecución local)";
+    let reportUrl = "Not available (Local execution)";
     let repoUrl = "";
     
     if (this.gitHubRepo) {
@@ -56,17 +56,17 @@ export default class SlackReporter implements Reporter {
           type: "header",
           text: {
             type: "plain_text",
-            text: failedCount > 0 ? "🚨 Pruebas Fallidas" : "🚀 Pruebas Exitosas",
+            text: failedCount > 0 ? "🚨 Tests Failed" : "🚀 Tests Passed",
             emoji: true
           }
         },
         {
           type: "section",
           fields: [
-            { type: "mrkdwn", text: `*Fecha:*\n${dateStr}` },
+            { type: "mrkdwn", text: `*Date:*\n${dateStr}` },
             { type: "mrkdwn", text: `*Total Tests:*\n${totalCount}` },
-            { type: "mrkdwn", text: `*✅ Pasaron:*\n${passedCount}` },
-            { type: "mrkdwn", text: `*❌ Fallaron:*\n${failedCount}` }
+            { type: "mrkdwn", text: `*✅ Passed:*\n${passedCount}` },
+            { type: "mrkdwn", text: `*❌ Failed:*\n${failedCount}` }
           ]
         }
       ]
@@ -78,13 +78,13 @@ export default class SlackReporter implements Reporter {
             elements: [
                 {
                     type: "button",
-                    text: { type: "plain_text", text: "📊 Ver Reporte HTML", emoji: true },
+                    text: { type: "plain_text", text: "📊 View HTML Report", emoji: true },
                     style: failedCount > 0 ? "danger" : "primary",
                     url: reportUrl
                 },
                 {
                     type: "button",
-                    text: { type: "plain_text", text: "🔍 Ver Logs en GitHub", emoji: true },
+                    text: { type: "plain_text", text: "🔍 View GitHub Logs", emoji: true },
                     url: repoUrl
                 }
             ]
