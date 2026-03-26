@@ -41,55 +41,12 @@ export default class SlackReporter implements Reporter {
     const now = new Date();
     const dateStr = now.toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" });
     
-    let reportUrl = "Not available (Local execution)";
-    let repoUrl = "";
+    const header = failedCount > 0 ? "🚨 Tests Failed" : "🚀 Tests Passed";
+    const summary = `*Test Summary*\nDate: ${dateStr}\nTotal: ${totalCount}\n✅ Passed: ${passedCount}\n❌ Failed: ${failedCount}`;
     
-    if (this.gitHubRepo) {
-        const [owner, repo] = this.gitHubRepo.split('/');
-        reportUrl = `https://${owner}.github.io/${repo}/`;
-        repoUrl = `${this.gitHubServerUrl}/${this.gitHubRepo}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-    }
-
     const payload = {
-      blocks: [
-        {
-          type: "header",
-          text: {
-            type: "plain_text",
-            text: failedCount > 0 ? "🚨 Tests Failed" : "🚀 Tests Passed",
-            emoji: true
-          }
-        },
-        {
-          type: "section",
-          fields: [
-            { type: "mrkdwn", text: `*Date:*\n${dateStr}` },
-            { type: "mrkdwn", text: `*Total Tests:*\n${totalCount}` },
-            { type: "mrkdwn", text: `*✅ Passed:*\n${passedCount}` },
-            { type: "mrkdwn", text: `*❌ Failed:*\n${failedCount}` }
-          ]
-        }
-      ]
+      text: `${header}\n${summary}`
     };
-
-    if (this.gitHubRepo) {
-        payload.blocks.push({
-            type: "actions",
-            elements: [
-                {
-                    type: "button",
-                    text: { type: "plain_text", text: "📊 View HTML Report", emoji: true },
-                    style: failedCount > 0 ? "danger" : "primary",
-                    url: reportUrl
-                },
-                {
-                    type: "button",
-                    text: { type: "plain_text", text: "🔍 View GitHub Logs", emoji: true },
-                    url: repoUrl
-                }
-            ]
-        });
-    }
 
     await this.sendSlackMessage(payload);
   }

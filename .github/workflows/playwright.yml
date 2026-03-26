@@ -2,6 +2,16 @@ name: Playwright Tests & Report
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to run tests"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - development
+          - qa
+          - production
   push:
     branches: [ main, master ]
   pull_request:
@@ -14,6 +24,7 @@ permissions:
 
 jobs:
   test:
+    environment: ${{ github.event.inputs.environment }}
     timeout-minutes: 60
     runs-on: ubuntu-22.04
     
@@ -35,9 +46,10 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Run Playwright tests
+      - name: Run Playwright tests with Slack reporting
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          BASE_URL: ${{ secrets.BASE_URL }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
           GITHUB_RUN_ID: ${{ github.run_id }}
@@ -45,9 +57,9 @@ jobs:
 
       - name: Upload Playwright report for Pages
         if: always()
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: github-pages
+          name: playwright-report
           path: playwright-report/
           retention-days: 30
 
